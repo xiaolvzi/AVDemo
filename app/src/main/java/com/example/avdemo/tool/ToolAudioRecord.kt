@@ -1,4 +1,4 @@
-package com.example.avdemo
+package com.example.avdemo.tool
 
 /**
  * desc: Audio的工具类 <br/>
