@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">AVDemo</string>
+    <string name="audio_capture">声音采集</string>
 </resources>
