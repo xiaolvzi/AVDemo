@@ -52,7 +52,6 @@ class ActivityMain : AppCompatActivity(), View.OnClickListener {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        // Forward results to EasyPermissions
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
     }
 
@@ -60,11 +59,8 @@ class ActivityMain : AppCompatActivity(), View.OnClickListener {
     private fun checkAudioPermission() {
         val perms = arrayOf(Manifest.permission.RECORD_AUDIO)
         if (EasyPermissions.hasPermissions(this, *perms)) {
-            // Already have permission, do the thing
-//            ARouter.getInstance().build(ActivityAudioRecord.Target).navigation()
-            startActivity(Intent(this,ActivityAudioRecord::class.java))
+            ARouter.getInstance().build(ActivityAudioRecord.Target).navigation()
         } else {
-            // Do not have permissions, request them now
             EasyPermissions.requestPermissions(this, "record permission",
                     PermissionConst.PERMISSION_AUDIO, *perms)
         }
