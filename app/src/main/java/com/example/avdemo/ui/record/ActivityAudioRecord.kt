@@ -85,7 +85,7 @@ class ActivityAudioRecord : AppCompatActivity(), View.OnClickListener {
             val audioData = ByteArray(bufferSizeInBytes)
             val read = audioRecord.read(audioData, 0, bufferSizeInBytes)
             if (AudioRecord.ERROR_INVALID_OPERATION != read) {
-                file.writeBytes(audioData)
+                file.appendBytes(audioData)
             }
         }
     }
