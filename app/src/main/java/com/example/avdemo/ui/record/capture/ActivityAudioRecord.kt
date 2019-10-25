@@ -1,4 +1,4 @@
-package com.example.avdemo.ui.record
+package com.example.avdemo.ui.record.capture
 
 import android.media.AudioRecord
 import androidx.appcompat.app.AppCompatActivity
@@ -68,7 +68,7 @@ class ActivityAudioRecord : AppCompatActivity(), View.OnClickListener {
         if (!isRecording) {
             audioRecord.startRecording()
             isRecording = true
-            Thread(Runnable { writeDataTOFile() }).start()
+            Thread(Runnable { writeData2File() }).start()
         }
     }
 
@@ -79,10 +79,10 @@ class ActivityAudioRecord : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-    private fun writeDataTOFile() {
-        val file = File(cacheDir, "record${System.currentTimeMillis()}.pcm")
+    private fun writeData2File() {
+        val file = File(cacheDir, "record_${System.currentTimeMillis()}.pcm")
+        val audioData = ByteArray(bufferSizeInBytes)
         while (isRecording) {
-            val audioData = ByteArray(bufferSizeInBytes)
             val read = audioRecord.read(audioData, 0, bufferSizeInBytes)
             if (AudioRecord.ERROR_INVALID_OPERATION != read) {
                 file.appendBytes(audioData)

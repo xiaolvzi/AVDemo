@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.record.play.ActivityPlayRecord">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_file_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_stop_play"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="20dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:borderWidth="0dp"
+        app:elevation="20dp"
+        app:fabSize="normal"
+        app:pressedTranslationZ="25dp"
+        app:rippleColor="@color/c_E0C34F" />
+</RelativeLayout>

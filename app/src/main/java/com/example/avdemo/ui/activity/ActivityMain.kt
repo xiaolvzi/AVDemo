@@ -3,21 +3,20 @@ package com.example.avdemo.ui.activity
 import androidx.appcompat.app.AppCompatActivity
 
 import android.Manifest
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 
 import com.alibaba.android.arouter.facade.annotation.Route
 import com.alibaba.android.arouter.launcher.ARouter
 import com.example.avdemo.R
 import com.example.avdemo.common.PermissionConst
-import com.example.avdemo.ui.record.ActivityAudioRecord
+import com.example.avdemo.ui.record.capture.ActivityAudioRecord
 
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 
 import com.example.avdemo.common.ViewPathConst.Companion.ACTIVITY_MAIN
+import com.example.avdemo.ui.record.play.ActivityPlayRecord
 import kotlinx.android.synthetic.main.activity_main.*
 
 /**
@@ -30,7 +29,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 class ActivityMain : AppCompatActivity(), View.OnClickListener {
 
     companion object {
-       const val Target = ACTIVITY_MAIN
+        const val Target = ACTIVITY_MAIN
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,12 +40,15 @@ class ActivityMain : AppCompatActivity(), View.OnClickListener {
 
     private fun initListener() {
         bt_audio_capture.setOnClickListener(this)
+        bt_audio_play.setOnClickListener(this)
     }
 
     override fun onClick(v: View) {
         when (v.id) {
             //音频采集
             R.id.bt_audio_capture -> checkAudioPermission()
+            //播放录音文件
+            R.id.bt_audio_play -> playAudio()
         }
     }
 
@@ -64,6 +66,10 @@ class ActivityMain : AppCompatActivity(), View.OnClickListener {
             EasyPermissions.requestPermissions(this, "record permission",
                     PermissionConst.PERMISSION_AUDIO, *perms)
         }
+    }
+
+    private fun playAudio() {
+        ARouter.getInstance().build(ActivityPlayRecord.Target).navigation()
     }
 
 }

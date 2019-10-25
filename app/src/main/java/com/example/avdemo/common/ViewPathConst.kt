@@ -12,6 +12,7 @@ class ViewPathConst {
     companion object {
         const val ACTIVITY_MAIN = "/app/ui/activity/ActivityMain"
         const val ACTIVITY_AUDIO_RECORD = "/app/ui/record/ActivityAudioRecord"
+        const val ACTIVITY_PLAY_RECORD = "/app/ui/record/ActivityPlayRecord"
     }
 
 }

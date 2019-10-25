@@ -12,7 +12,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.example.avdemo.ui.record.ActivityAudioRecord"></activity>
+        <activity android:name=".ui.record.play.ActivityPlayRecord"></activity>
+        <activity android:name=".ui.record.capture.ActivityAudioRecord" />
         <activity android:name=".ui.activity.ActivityMain">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
