@@ -27,11 +27,13 @@ import java.util.ArrayList
 class ActivityPlayRecord : AppCompatActivity() {
 
     lateinit var audioTrack: AudioTrack
+    val audioSample by lazy { Integer.parseInt(et_audio_sample.text.toString()) }
+
     /**
      * 缓冲区大小：缓冲区字节大小
      */
     private val bufferSizeInBytes by lazy {
-        AudioRecord.getMinBufferSize(ActivityAudioRecord.AUDIO_SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)
+        AudioRecord.getMinBufferSize(audioSample, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)
     }
 
     companion object {
@@ -55,14 +57,14 @@ class ActivityPlayRecord : AppCompatActivity() {
                             .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                             .build(),
                     AudioFormat.Builder()
-                            .setSampleRate(ActivityAudioRecord.AUDIO_SAMPLE_RATE)
+                            .setSampleRate(audioSample)
                             .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
                             .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
                             .build(),
                     bufferSizeInBytes,
                     AudioTrack.MODE_STREAM, AUDIO_SESSION_ID_GENERATE)
         } else {
-            audioTrack = AudioTrack(STREAM_MUSIC, ActivityAudioRecord.AUDIO_SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO,
+            audioTrack = AudioTrack(STREAM_MUSIC, audioSample, AudioFormat.CHANNEL_OUT_MONO,
                     AudioFormat.ENCODING_PCM_16BIT, bufferSizeInBytes, AudioTrack.MODE_STREAM)
         }
     }

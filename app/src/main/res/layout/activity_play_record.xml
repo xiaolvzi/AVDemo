@@ -6,8 +6,15 @@
     android:layout_height="match_parent"
     tools:context=".ui.record.play.ActivityPlayRecord">
 
+    <EditText
+        android:id="@+id/et_audio_sample"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/default_sample"
+        android:hint="@string/audio_sample"/>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_file_list"
+        android:layout_below="@id/et_audio_sample"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

@@ -10,5 +10,6 @@ package com.example.avdemo.common
 class PermissionConst {
     companion object{
         const val PERMISSION_AUDIO = 0
+        const val PERMISSION_VIDEO = 1
     }
 }
