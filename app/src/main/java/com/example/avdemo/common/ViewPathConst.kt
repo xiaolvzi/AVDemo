@@ -15,6 +15,7 @@ class ViewPathConst {
         const val ACTIVITY_PLAY_RECORD = "/app/ui/record/ActivityPlayRecord"
         const val ACTIVITY_VIDEO_CPATURE = "/app/ui/record/ActivityVideoCapture"
         const val ACTIVITY_VIDEO_CPATURE21 = "/app/ui/record/ActivityVideoCapture21"
+        const val ACTIVITY_TEXTURE_VIEW = "/app/ui/record/ActivityTextureView"
         const val ACTIVITY_PLAY_VIDEO = "/app/ui/record/ActivityPlayVideo"
     }
 

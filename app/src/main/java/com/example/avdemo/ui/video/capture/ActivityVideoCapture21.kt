@@ -11,7 +11,9 @@ import android.os.HandlerThread
 import android.util.Log
 import android.util.Size
 import android.view.Surface
+import android.view.SurfaceHolder
 import android.view.TextureView
+import android.view.View
 import androidx.annotation.RequiresApi
 import com.alibaba.android.arouter.facade.annotation.Route
 import com.example.avdemo.R
@@ -28,8 +30,7 @@ import kotlin.collections.ArrayList
  */
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 @Route(path = ActivityVideoCapture21.Target)
-class ActivityVideoCapture21 : AppCompatActivity(), TextureView.SurfaceTextureListener {
-
+class ActivityVideoCapture21 : AppCompatActivity(), SurfaceHolder.Callback,View.OnClickListener {
 
     private lateinit var cameraCaptureSessions: CameraCaptureSession
     private lateinit var captureRequestBuilder: CaptureRequest.Builder
@@ -48,8 +49,14 @@ class ActivityVideoCapture21 : AppCompatActivity(), TextureView.SurfaceTextureLi
         Log.e("lv","ActivityVideoCapture21--->onCreate")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_video_capture21)
-        tv_camera_preview.surfaceTextureListener = this
+        tv_camera_preview.holder.addCallback( this)
         startBackgroundThread()
+        initListener()
+    }
+
+    private fun initListener() {
+        bt_take_picture.setOnClickListener(this)
+        bt_capture_video.setOnClickListener(this)
     }
 
     override fun onResume() {
@@ -61,6 +68,22 @@ class ActivityVideoCapture21 : AppCompatActivity(), TextureView.SurfaceTextureLi
         Log.e("lv","ActivityVideoCapture21--->onPause")
         stopBackgroundThread()
         super.onPause()
+    }
+
+    override fun onClick(v: View?) {
+        when (v?.id) {
+            R.id.bt_take_picture->takePicture()
+            R.id.bt_capture_video->captureVideo()
+        }
+    }
+
+    private fun takePicture() {
+        cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
+
+    }
+
+    private fun captureVideo() {
+
     }
 
     private fun startBackgroundThread() {
@@ -77,22 +100,13 @@ class ActivityVideoCapture21 : AppCompatActivity(), TextureView.SurfaceTextureLi
         }
     }
 
-    override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture?, width: Int, height: Int) {
-        Log.e("lv","TextureView--->onSurfaceTextureSizeChanged")
-
+    override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
     }
 
-    override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {
-        Log.e("lv","TextureView--->onSurfaceTextureUpdated")
+    override fun surfaceDestroyed(holder: SurfaceHolder?) {
     }
 
-    override fun onSurfaceTextureDestroyed(surface: SurfaceTexture?): Boolean {
-        Log.e("lv","TextureView--->onSurfaceTextureDestroyed")
-        return false
-    }
-
-    override fun onSurfaceTextureAvailable(surface: SurfaceTexture?, width: Int, height: Int) {
-        Log.e("lv","TextureView--->onSurfaceTextureAvailable")
+    override fun surfaceCreated(holder: SurfaceHolder?) {
         /** 1 */
         openCamera()
     }
@@ -125,12 +139,9 @@ class ActivityVideoCapture21 : AppCompatActivity(), TextureView.SurfaceTextureLi
     }
 
     private fun createCameraPreview() {
-        val surfaceTexture = tv_camera_preview.surfaceTexture
-        surfaceTexture.setDefaultBufferSize(imageDimension.width, imageDimension.height)
-        val surface = Surface(surfaceTexture)
         captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
-        captureRequestBuilder.addTarget(surface)
-        cameraDevice.createCaptureSession(listOf(surface), object : CameraCaptureSession.StateCallback() {
+        captureRequestBuilder.addTarget(tv_camera_preview.holder.surface)
+        cameraDevice.createCaptureSession(listOf(tv_camera_preview.holder.surface), object : CameraCaptureSession.StateCallback() {
 
             override fun onConfigured(session: CameraCaptureSession) {
                 Log.e("lv","CameraCaptureSession--->onConfigured")

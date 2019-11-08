@@ -11,4 +11,5 @@
     <string name="bt_take_picture">拍照</string>
     <string name="bt_capture_video">录像</string>
     <string name="stop_capture">停止</string>
+    <string name="texture_take_img">TextureView拍照</string>
 </resources>

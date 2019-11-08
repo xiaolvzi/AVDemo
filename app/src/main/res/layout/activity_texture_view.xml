@@ -4,9 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.video.capture.ActivityVideoCapture">
+    tools:context=".ui.video.capture.ActivityTextureView">
 
-    <SurfaceView
+    <TextureView
         android:id="@+id/tv_camera_preview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -19,10 +19,4 @@
         android:layout_weight="1.3"
         android:text="@string/bt_take_picture" />
 
-    <Button
-        android:id="@+id/bt_capture_video"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1.3"
-        android:text="@string/bt_capture_video" />
 </LinearLayout>

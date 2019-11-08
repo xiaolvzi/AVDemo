@@ -4,22 +4,19 @@ import android.graphics.SurfaceTexture
 import android.hardware.Camera
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.TextureView
 import com.alibaba.android.arouter.facade.annotation.Route
 import com.example.avdemo.common.ViewPathConst
 import kotlinx.android.synthetic.main.activity_video_capture.*
-import java.io.IOException
-import androidx.core.app.ComponentActivity.ExtraData
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import android.media.CamcorderProfile
 import android.media.CamcorderProfile.QUALITY_HIGH
 import android.media.MediaRecorder
 import android.util.Log
+import android.view.SurfaceHolder
 import android.view.View
 import android.widget.Toast
 import com.example.avdemo.R
 import java.io.File
+import java.lang.Exception
 
 
 /**
@@ -28,14 +25,11 @@ import java.io.File
  * author: 吕昊臻 <br/>
  * since V 1.0 <br/>
  */
-@Suppress("DEPRECATION")
 @Route(path = ActivityVideoCapture.Target)
-class ActivityVideoCapture : AppCompatActivity(), TextureView.SurfaceTextureListener, Camera.PreviewCallback, View.OnClickListener {
+class ActivityVideoCapture : AppCompatActivity(), SurfaceHolder.Callback, View.OnClickListener {
 
     private lateinit var camera: Camera
     private var surface: SurfaceTexture? = null
-    private var isTakingPicture: Boolean = false
-    private var isStopPreview: Boolean = false
     private var isRecording: Boolean = false
     private val mediaRecorder by lazy { MediaRecorder() }
 
@@ -44,18 +38,10 @@ class ActivityVideoCapture : AppCompatActivity(), TextureView.SurfaceTextureList
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.e("lv", "onCreate")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_video_capture)
-        tv_camera_preview.surfaceTextureListener = this
-        initCamera()
+        tv_camera_preview.holder.addCallback(this)
         initListener()
-
-    }
-
-    private fun initCamera() {
-        camera = Camera.open()
-        camera.setPreviewCallback(this)
     }
 
     private fun initListener() {
@@ -63,62 +49,47 @@ class ActivityVideoCapture : AppCompatActivity(), TextureView.SurfaceTextureList
         bt_capture_video.setOnClickListener(this)
     }
 
-    override fun onResume() {
-        Log.e("lv", "onResume")
-        super.onResume()
+    //SurfaceHolder.Callback--------------------------------start-----------------------------------
+    override fun surfaceCreated(holder: SurfaceHolder?) {
+        startPreview(surface)
+    }
+
+    override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
+    }
+
+    override fun surfaceDestroyed(holder: SurfaceHolder?) {
+        stopPreview()
+    }
+
+    /**
+     * 开始预览
+     *
+     * @param surface 与camera关联的SurfaceTexture
+     */
+    private fun startPreview(surface: SurfaceTexture?) {
+        camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK)
+        camera.setDisplayOrientation(90)
+        camera.setPreviewTexture(surface)
         camera.startPreview()
     }
 
-    override fun onPause() {
-        Log.e("lv", "onPause")
-        super.onPause()
-        isStopPreview = true
-        camera.stopPreview()
-    }
-
-    override fun onDestroy() {
-        Log.e("lv", "onDestroy")
-        super.onDestroy()
-        isStopPreview = true
-        camera.stopPreview()
-        camera.release()
-    }
-
-    //SurfaceTextureListener--------------------------------start-----------------------------------
-    override fun onSurfaceTextureAvailable(surface: SurfaceTexture?, width: Int, height: Int) {
-        Log.e("lv", "onSurfaceTextureAvailable")
-        this.surface = surface
-        camera.setDisplayOrientation(90)
-        camera.setPreviewTexture(surface)
-    }
-
-    override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture?, width: Int, height: Int) {
-        Log.e("lv", "onSurfaceTextureSizeChanged")
-    }
-
-    override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {
-        Log.e("lv", "onSurfaceTextureUpdated")
-        if (!isTakingPicture && !isStopPreview) {
-            camera.startPreview()
+    /**
+     * 停止预览
+     */
+    private fun stopPreview() {
+        try {
+            camera.stopPreview()
+            camera.release()
+        } catch (exception: Exception) {
+            exception.printStackTrace()
         }
-    }
-
-    override fun onSurfaceTextureDestroyed(surface: SurfaceTexture?): Boolean {
-        Log.e("lv", "onSurfaceTextureDestroyed")
-        isStopPreview = true
-        return false
-    }
-
-    //onPreviewFrame------------------------------------start---------------------------------------
-    override fun onPreviewFrame(data: ByteArray?, camera: Camera?) {
-
     }
 
     //OnClickListener-----------------------------------start---------------------------------------
     override fun onClick(v: View?) {
         when (v?.id) {
-            R.id.bt_take_picture -> takePicture()//拍照
-            R.id.bt_audio_capture -> captureVideo()//录像
+            com.example.avdemo.R.id.bt_take_picture -> takePicture()//拍照
+            com.example.avdemo.R.id.bt_audio_capture -> captureVideo()//录像
         }
     }
 
@@ -127,18 +98,16 @@ class ActivityVideoCapture : AppCompatActivity(), TextureView.SurfaceTextureList
      */
     private fun takePicture() {
         Log.e("lv", "takePicture")
-        isTakingPicture = true
         camera.takePicture({
             Toast.makeText(this, "拍照", Toast.LENGTH_LONG).show()
         }, { data, camera ->
             data?.let {
                 File(cacheDir, "picture_${System.currentTimeMillis()}.raw").writeBytes(data)
-                camera.startPreview()
             }
         }, { data, camera ->
             File(cacheDir, "picture${System.currentTimeMillis()}.jpeg").writeBytes(data)
-            camera.startPreview()
-            isTakingPicture = false
+            stopPreview()
+            startPreview(surface)
         })
     }
 
@@ -156,7 +125,7 @@ class ActivityVideoCapture : AppCompatActivity(), TextureView.SurfaceTextureList
 
     private fun startCapture() {
         isRecording = true
-        bt_capture_video.text = getString(R.string.stop_capture)
+        bt_capture_video.text = getString(com.example.avdemo.R.string.stop_capture)
         camera.unlock()
         with(mediaRecorder) {
             setCamera(camera)
@@ -177,7 +146,7 @@ class ActivityVideoCapture : AppCompatActivity(), TextureView.SurfaceTextureList
 
     private fun stopCapture() {
         isRecording = false
-        bt_capture_video.text = getString(R.string.video_capture)
+        bt_capture_video.text = getString(com.example.avdemo.R.string.video_capture)
         with(mediaRecorder) {
             stop()
             release()

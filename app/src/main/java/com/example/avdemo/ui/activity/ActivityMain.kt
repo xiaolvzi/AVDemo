@@ -20,9 +20,13 @@ import pub.devrel.easypermissions.EasyPermissions
 
 import com.example.avdemo.common.ViewPathConst.Companion.ACTIVITY_MAIN
 import com.example.avdemo.ui.record.play.ActivityPlayRecord
+import com.example.avdemo.ui.video.capture.ActivityTextureView
 import com.example.avdemo.ui.video.capture.ActivityVideoCapture
 import com.example.avdemo.ui.video.capture.ActivityVideoCapture21
 import kotlinx.android.synthetic.main.activity_main.*
+
+const val TEXTURE_VIEW = 0
+const val SURFACE_VIEW = 1
 
 /**
  * desc: App入口 <br></br>
@@ -37,6 +41,7 @@ class ActivityMain : AppCompatActivity(), View.OnClickListener {
         const val Target = ACTIVITY_MAIN
     }
 
+    private var type = TEXTURE_VIEW
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -47,6 +52,7 @@ class ActivityMain : AppCompatActivity(), View.OnClickListener {
         bt_audio_capture.setOnClickListener(this)
         bt_audio_play.setOnClickListener(this)
         bt_video_capture.setOnClickListener(this)
+        bt_texture_take_img.setOnClickListener(this)
     }
 
     override fun onClick(v: View) {
@@ -56,11 +62,23 @@ class ActivityMain : AppCompatActivity(), View.OnClickListener {
             //播放录音文件
             R.id.bt_audio_play -> playAudio()
             //采集视频
-            R.id.bt_video_capture -> checkCameraPermission()
+            R.id.bt_video_capture -> {
+                type= SURFACE_VIEW
+                checkCameraPermission()
+            }
+            //TextureView拍照
+            R.id.bt_texture_take_img ->{
+                type= TEXTURE_VIEW
+                checkCameraPermission()
+            }
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
     }
@@ -71,8 +89,10 @@ class ActivityMain : AppCompatActivity(), View.OnClickListener {
         if (EasyPermissions.hasPermissions(this, *perms)) {
             ARouter.getInstance().build(ActivityAudioRecord.Target).navigation()
         } else {
-            EasyPermissions.requestPermissions(this, "record permission",
-                    PermissionConst.PERMISSION_AUDIO, *perms)
+            EasyPermissions.requestPermissions(
+                this, "record permission",
+                PermissionConst.PERMISSION_AUDIO, *perms
+            )
         }
     }
 
@@ -80,10 +100,15 @@ class ActivityMain : AppCompatActivity(), View.OnClickListener {
     private fun checkCameraPermission() {
         val perms = arrayOf(Manifest.permission.CAMERA)
         if (EasyPermissions.hasPermissions(this, *perms)) {
-            gotoVideoActivity()
+            when (type) {
+                SURFACE_VIEW -> gotoVideoActivity()
+                TEXTURE_VIEW -> ARouter.getInstance().build(ActivityTextureView.Target).navigation()
+            }
         } else {
-            EasyPermissions.requestPermissions(this, "video permission",
-                    PermissionConst.PERMISSION_VIDEO, *perms)
+            EasyPermissions.requestPermissions(
+                this, "video permission",
+                PermissionConst.PERMISSION_VIDEO, *perms
+            )
         }
 
     }
@@ -93,7 +118,7 @@ class ActivityMain : AppCompatActivity(), View.OnClickListener {
      */
     private fun gotoVideoActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            ARouter.getInstance().build(ActivityVideoCapture.Target).navigation()
+            ARouter.getInstance().build(ActivityVideoCapture21.Target).navigation()
         } else {
             ARouter.getInstance().build(ActivityVideoCapture.Target).navigation()
         }

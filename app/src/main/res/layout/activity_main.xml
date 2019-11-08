@@ -21,4 +21,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/video_capture" />
+
+    <Button
+        android:id="@+id/bt_texture_take_img"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/texture_take_img" />
 </LinearLayout>

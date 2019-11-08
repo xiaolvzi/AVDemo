@@ -6,7 +6,7 @@
     android:orientation="vertical"
     tools:context=".ui.video.capture.ActivityVideoCapture21">
 
-    <TextureView
+    <SurfaceView
         android:id="@+id/tv_camera_preview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
