@@ -19,6 +19,7 @@ import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 
 import com.example.avdemo.common.ViewPathConst.Companion.ACTIVITY_MAIN
+import com.example.avdemo.ui.media.ActivityMediaExtractor
 import com.example.avdemo.ui.record.play.ActivityPlayRecord
 import com.example.avdemo.ui.video.capture.ActivityTextureView
 import com.example.avdemo.ui.video.capture.ActivityVideoCapture
@@ -53,6 +54,7 @@ class ActivityMain : AppCompatActivity(), View.OnClickListener {
         bt_audio_play.setOnClickListener(this)
         bt_video_capture.setOnClickListener(this)
         bt_texture_take_img.setOnClickListener(this)
+        bt_media_extractor.setOnClickListener(this)
     }
 
     override fun onClick(v: View) {
@@ -71,6 +73,9 @@ class ActivityMain : AppCompatActivity(), View.OnClickListener {
                 type= TEXTURE_VIEW
                 checkCameraPermission()
             }
+            //音视频分离
+            R.id.bt_media_extractor -> ARouter.getInstance().build(ActivityMediaExtractor.Target).navigation()
+
         }
     }
 
@@ -127,5 +132,6 @@ class ActivityMain : AppCompatActivity(), View.OnClickListener {
     private fun playAudio() {
         ARouter.getInstance().build(ActivityPlayRecord.Target).navigation()
     }
+
 
 }

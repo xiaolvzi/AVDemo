@@ -14,13 +14,15 @@
     <application
         android:name=".MyApplication"
         android:allowBackup="true"
+        android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:hardwareAccelerated="true"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.video.capture.ActivityTextureView"/>
+        <activity android:name=".ui.media.ActivityMediaMuxer"></activity>
+        <activity android:name=".ui.media.ActivityMediaExtractor" />
+        <activity android:name=".ui.video.capture.ActivityTextureView" />
         <activity android:name=".ui.video.capture.ActivityVideoCapture21" />
         <activity android:name=".ui.video.capture.ActivityVideoCapture" />
         <activity android:name=".ui.record.play.ActivityPlayRecord" />

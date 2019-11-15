@@ -27,4 +27,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/texture_take_img" />
+
+    <Button
+        android:id="@+id/bt_media_extractor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/media_extractor" />
 </LinearLayout>
