@@ -58,86 +58,11 @@ class ActivityMediaExtractor : AppCompatActivity() {
                 mime?.let {
                     when {
                         it.startsWith("audio") -> {
-
-                            val allocate = ByteBuffer.allocate(100 * 1024)
-
-                            run {
-                                mediaExtractor.selectTrack(i)//选择此音频轨道
-                                mediaExtractor.readSampleData(allocate, 0)
-                                val firstSampleTime = mediaExtractor.sampleTime
-                                mediaExtractor.advance()
-                                val secondSampleTime = mediaExtractor.sampleTime
-                                longFrameRate = abs(secondSampleTime - firstSampleTime)//时间戳
-                                mediaExtractor.unselectTrack(i)
-                            }
-
-                            mediaMuxer = MediaMuxer(
-                                File(
-                                    filesDir,
-                                    "audio${System.currentTimeMillis()}.mp4"
-                                ).absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4
-                            )
-                            audioTrackIndex = mediaMuxer.addTrack(format)
-                            mediaMuxer.start()
-
-                            val info = MediaCodec.BufferInfo()
-                            info.presentationTimeUs = 0
-
-                            Log.e("lv", "divide audio media to file + $mime")
-                            mediaExtractor.selectTrack(i)
-                            val file = File(filesDir, "audio${System.currentTimeMillis()}.aac")
-                            while (mediaExtractor.readSampleData(allocate, 0) > 0) {
-                                file.appendBytes(ByteArray(allocate.remaining()))
-
-                                info.offset = 0
-                                info.size = mediaExtractor.readSampleData(allocate, 0)
-                                info.flags = mediaExtractor.sampleFlags
-                                info.presentationTimeUs += longFrameRate
-                                mediaMuxer.writeSampleData(audioTrackIndex, allocate, info)
-
-                                mediaExtractor.advance()
-                            }
-
-                            mediaMuxer.stop()
-                            mediaMuxer.release()
+                            doAudio(i, format, mime)
                         }
 
                         it.startsWith("video") -> {
-                            mediaExtractor.selectTrack(i)
-
-                            intFrameRate = format.getInteger(MediaFormat.KEY_FRAME_RATE)
-
-                            mediaMuxer =
-                                MediaMuxer(
-                                    File(
-                                        filesDir,
-                                        "video${System.currentTimeMillis()}.mp4"
-                                    ).absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4
-                                )
-                            videoTrackIndex = mediaMuxer.addTrack(format)
-                            mediaMuxer.start()
-
-                            val info = MediaCodec.BufferInfo()
-                            info.presentationTimeUs = 0
-
-                            val file = File(filesDir, "video${System.currentTimeMillis()}.h264")
-                            val allocate = ByteBuffer.allocate(640 * 360)
-
-                            while (mediaExtractor.readSampleData(allocate, 0) >= 0) {
-                                file.appendBytes(ByteArray(allocate.remaining()))
-
-
-                                info.offset = 0
-                                info.size = mediaExtractor.readSampleData(allocate, 0)
-                                info.flags = mediaExtractor.sampleFlags
-                                info.presentationTimeUs += 1000 * 1000 / intFrameRate
-                                mediaMuxer.writeSampleData(videoTrackIndex, allocate, info)
-
-                                mediaExtractor.advance()
-                            }
-
-                            mediaMuxer.stop()
-                            mediaMuxer.release()
+                            doVideo(i, format)
                         }
                     }
                 }
@@ -145,6 +70,101 @@ class ActivityMediaExtractor : AppCompatActivity() {
             runOnUiThread {tv_status.text="finished"}
         }.start()
 
+    }
+
+    /**
+     * 合成视频
+     *
+     * @param videoTrack
+     * @param format
+     */
+    private fun doVideo(videoTrack: Int, format: MediaFormat) {
+        mediaExtractor.selectTrack(videoTrack)
+
+        intFrameRate = format.getInteger(MediaFormat.KEY_FRAME_RATE)
+
+        mediaMuxer =
+            MediaMuxer(
+                File(
+                    filesDir,
+                    "video${System.currentTimeMillis()}.mp4"
+                ).absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4
+            )
+        videoTrackIndex = mediaMuxer.addTrack(format)
+        mediaMuxer.start()
+
+        val info = MediaCodec.BufferInfo()
+        info.presentationTimeUs = 0
+
+        val file = File(filesDir, "video${System.currentTimeMillis()}.h264")
+        val allocate = ByteBuffer.allocate(640 * 360)
+
+        while (mediaExtractor.readSampleData(allocate, 0) >= 0) {
+            file.appendBytes(ByteArray(allocate.remaining()))
+
+
+            info.offset = 0
+            info.size = mediaExtractor.readSampleData(allocate, 0)
+            info.flags = mediaExtractor.sampleFlags
+            info.presentationTimeUs += 1000 * 1000 / intFrameRate
+            mediaMuxer.writeSampleData(videoTrackIndex, allocate, info)
+
+            mediaExtractor.advance()
+        }
+
+        mediaMuxer.stop()
+        mediaMuxer.release()
+    }
+
+    /**
+     * 合成音频
+     *
+     * @param videoTrack
+     * @param format
+     * @param mime
+     */
+    private fun doAudio(videoTrack: Int, format: MediaFormat, mime: String?) {
+        val allocate = ByteBuffer.allocate(100 * 1024)
+
+        run {
+            mediaExtractor.selectTrack(videoTrack)//选择此音频轨道
+            mediaExtractor.readSampleData(allocate, 0)
+            val firstSampleTime = mediaExtractor.sampleTime
+            mediaExtractor.advance()
+            val secondSampleTime = mediaExtractor.sampleTime
+            longFrameRate = abs(secondSampleTime - firstSampleTime)//时间戳
+            mediaExtractor.unselectTrack(videoTrack)
+        }
+
+        mediaMuxer = MediaMuxer(
+            File(
+                filesDir,
+                "audio${System.currentTimeMillis()}.mp4"
+            ).absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4
+        )
+        audioTrackIndex = mediaMuxer.addTrack(format)
+        mediaMuxer.start()
+
+        val info = MediaCodec.BufferInfo()
+        info.presentationTimeUs = 0
+
+        Log.e("lv", "divide audio media to file + $mime")
+        mediaExtractor.selectTrack(videoTrack)
+        val file = File(filesDir, "audio${System.currentTimeMillis()}.aac")
+        while (mediaExtractor.readSampleData(allocate, 0) > 0) {
+            file.appendBytes(ByteArray(allocate.remaining()))
+
+            info.offset = 0
+            info.size = mediaExtractor.readSampleData(allocate, 0)
+            info.flags = mediaExtractor.sampleFlags
+            info.presentationTimeUs += longFrameRate
+            mediaMuxer.writeSampleData(audioTrackIndex, allocate, info)
+
+            mediaExtractor.advance()
+        }
+
+        mediaMuxer.stop()
+        mediaMuxer.release()
     }
 
     override fun onDestroy() {
