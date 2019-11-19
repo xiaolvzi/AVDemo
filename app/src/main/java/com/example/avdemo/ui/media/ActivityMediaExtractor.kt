@@ -48,6 +48,11 @@ class ActivityMediaExtractor : AppCompatActivity() {
             }
     }
 
+    /**
+     * 这个地方流程写得有问题
+     * 可参考 https://blog.csdn.net/u010126792/article/details/86510903
+     * 来不及 纠正了 流程大致就是这样子，用到的时候再去细究具体问题
+     */
     private fun initMuxer() {
         Thread {
             mediaMuxer = MediaMuxer(
@@ -78,7 +83,6 @@ class ActivityMediaExtractor : AppCompatActivity() {
             writeVideoTrack()
 
             writeAudioTrack(allocate)
-
 
             mediaMuxer.stop()
             mediaMuxer.release()

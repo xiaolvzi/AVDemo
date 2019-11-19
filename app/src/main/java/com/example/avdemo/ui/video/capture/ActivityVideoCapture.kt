@@ -20,7 +20,7 @@ import java.lang.Exception
 
 
 /**
- * desc: 以上视频采集 <br/>
+ * desc: 视频采集 <br/>
  * time: 2019/10/24 10:10 <br/>
  * author: 吕昊臻 <br/>
  * since V 1.0 <br/>

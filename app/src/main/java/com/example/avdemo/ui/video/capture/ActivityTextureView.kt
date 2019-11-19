@@ -16,6 +16,11 @@ import java.io.File
 import java.io.IOException
 import java.lang.Exception
 
+/**
+ * 这个类 可以实现连续拍照，但是返回上一个界面会crash
+ * 具体原因应该是 camera的生命周期跟activity生命周期的问题
+ * 目前只是书音视频api，具体用到再去解决
+ */
 @Suppress("DEPRECATION")
 @Route(path = ActivityTextureView.Target)
 class ActivityTextureView : AppCompatActivity(), TextureView.SurfaceTextureListener,
