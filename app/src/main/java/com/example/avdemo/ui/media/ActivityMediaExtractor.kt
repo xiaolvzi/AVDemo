@@ -24,6 +24,7 @@ class ActivityMediaExtractor : AppCompatActivity() {
     private var audioTrackIndex = 0
     private var longFrameRate: Long = 0
     private var intFrameRate: Int = 0
+    private val allocate = ByteBuffer.allocate(100 * 1024)
 
     companion object {
         const val Target = ViewPathConst.ACTIVITY_MEDIA_EXTRACTOR
@@ -33,17 +34,92 @@ class ActivityMediaExtractor : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(com.example.avdemo.R.layout.activity_media_extractor)
         bt_extractor.setOnClickListener { initMediaExtractor() }
+        bt_mux.setOnClickListener { initMuxer() }
         initView()
     }
 
     private fun initView() {
-        tv_status.text="not started"
+        tv_status.text = "not started"
         filesDir.walk()
             .filter { it.isFile }
             .filter { it.extension == "mp4" }
             .forEach {
                 tv_file_name.text = it.absolutePath
             }
+    }
+
+    private fun initMuxer() {
+        Thread {
+            mediaMuxer = MediaMuxer(
+                File(filesDir, "muxer.mp4").absolutePath,
+                MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4
+            )
+            mediaExtractor = MediaExtractor()
+            mediaExtractor.setDataSource(File(filesDir, "video.mp4").absolutePath)
+            for (i in 0 until mediaExtractor.trackCount) {
+
+                val format = mediaExtractor.getTrackFormat(i)
+                val mime = format.getString(MediaFormat.KEY_MIME)
+
+                mime?.let {
+                    when {
+                        it.startsWith("audio") -> {
+                            doMuxerAudio(i, format)
+                        }
+
+                        it.startsWith("video") -> {
+                            doMuxerVideo(i, format)
+                        }
+                    }
+                }
+            }
+            mediaMuxer.start()
+
+            writeVideoTrack()
+
+            writeAudioTrack(allocate)
+
+
+            mediaMuxer.stop()
+            mediaMuxer.release()
+
+            runOnUiThread { tv_status.text = "finished" }
+        }.start()
+    }
+
+    private fun writeAudioTrack(allocate: ByteBuffer) {
+        val info = MediaCodec.BufferInfo()
+        info.presentationTimeUs = 0
+
+        mediaExtractor.selectTrack(1)
+        while (mediaExtractor.readSampleData(allocate, 0) > 0) {
+
+            info.offset = 0
+            info.size = mediaExtractor.readSampleData(allocate, 0)
+            info.flags = mediaExtractor.sampleFlags
+            info.presentationTimeUs += longFrameRate
+            mediaMuxer.writeSampleData(audioTrackIndex, allocate, info)
+
+            mediaExtractor.advance()
+        }
+    }
+
+    private fun writeVideoTrack() {
+        val info = MediaCodec.BufferInfo()
+        info.presentationTimeUs = 0
+
+        val allocate = ByteBuffer.allocate(640 * 360)
+        mediaExtractor.selectTrack(0)
+        while (mediaExtractor.readSampleData(allocate, 0) >= 0) {
+
+            info.offset = 0
+            info.size = mediaExtractor.readSampleData(allocate, 0)
+            info.flags = mediaExtractor.sampleFlags
+            info.presentationTimeUs += 1000 * 1000 / intFrameRate
+            mediaMuxer.writeSampleData(videoTrackIndex, allocate, info)
+
+            mediaExtractor.advance()
+        }
     }
 
     private fun initMediaExtractor() {
@@ -67,7 +143,7 @@ class ActivityMediaExtractor : AppCompatActivity() {
                     }
                 }
             }
-            runOnUiThread {tv_status.text="finished"}
+            runOnUiThread { tv_status.text = "finished" }
         }.start()
 
     }
@@ -124,7 +200,7 @@ class ActivityMediaExtractor : AppCompatActivity() {
      * @param mime
      */
     private fun doAudio(videoTrack: Int, format: MediaFormat, mime: String?) {
-        val allocate = ByteBuffer.allocate(100 * 1024)
+
 
         run {
             mediaExtractor.selectTrack(videoTrack)//选择此音频轨道
@@ -165,6 +241,42 @@ class ActivityMediaExtractor : AppCompatActivity() {
 
         mediaMuxer.stop()
         mediaMuxer.release()
+    }
+
+    /**
+     * 合成视频
+     *
+     * @param videoTrack
+     * @param format
+     */
+    private fun doMuxerVideo(videoTrack: Int, format: MediaFormat) {
+        mediaExtractor.selectTrack(videoTrack)
+        intFrameRate = format.getInteger(MediaFormat.KEY_FRAME_RATE)
+        videoTrackIndex = mediaMuxer.addTrack(format)
+    }
+
+    /**
+     * 合成音频
+     *
+     * @param videoTrack
+     * @param format
+     * @param mime
+     */
+    private fun doMuxerAudio(videoTrack: Int, format: MediaFormat) {
+        val allocate = ByteBuffer.allocate(100 * 1024)
+
+        run {
+            mediaExtractor.selectTrack(videoTrack)//选择此音频轨道
+            mediaExtractor.readSampleData(allocate, 0)
+            val firstSampleTime = mediaExtractor.sampleTime
+            mediaExtractor.advance()
+            val secondSampleTime = mediaExtractor.sampleTime
+            longFrameRate = abs(secondSampleTime - firstSampleTime)//时间戳
+            mediaExtractor.unselectTrack(videoTrack)
+        }
+
+        audioTrackIndex = mediaMuxer.addTrack(format)
+
     }
 
     override fun onDestroy() {
